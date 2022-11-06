@@ -1,5 +1,9 @@
-import {UseRef,UseState,UseEffect} from 'react';
+import {UseRef,UseState,UseEffect, UseContext} from 'react';
+import AuthContext from './context/AuthProvider';
+import axios from './api/axios';
+const LOGIN_URL = './auth';
 const login =()=>{
+    const {setAuth} = UseContext(AuthContext);
     const userRef = UseRef();
     const errRef = UseRef();
     const [user,setUser] = UseState('');
@@ -14,10 +18,29 @@ const login =()=>{
     },[user,pwd])
     const handleSubmit = async(e)=>{
         e.preventDefault();
-        console.log(user,pwd);
-        setUser('');
-        setPwd('');
-        setSuccess(true);
+        try{
+                const response = await axios.post(LOGIN_URL, JSON.stringify({user,pwd}),{
+                    headers: {'Content-Type': 'application/json'},withCredentials:true
+                }
+            );
+            const accessToken = response?.data?.accessToken;
+            const roles = response?.data?.roles;
+            setAuth({user,pwd,roles,accessToken });
+            setUser('');
+            setPwd('');
+            setSuccess(true);
+        }catch(err){
+            if(!err?.response){
+                setErrMsg('No server response');
+            }else if(err.response?.status===400){
+                setErrMsg('Missig username or password');
+            }else if(err.response?.status === 401){
+                setErrMsg('Unauthorized');
+            }else{
+                setErrMsg('Login Failed');
+            }
+            errRef.current.focus();
+        }
     }
     return (
         <>
@@ -44,7 +67,7 @@ const login =()=>{
                 Need an Account?<br/>
                 <span className='line'>
                     {/*put router link*/}
-                    <a href='/dashboard'>Sign Up</a>
+                    <a href='#'>Sign Up</a>
                 </span>
             </p>
         </section>
