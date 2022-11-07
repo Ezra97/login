@@ -1,5 +1,4 @@
 import './App.css';
-import Login from './Login';
 import profile from './images/a.png';
 import email from './images/email.jpg';
 import password from './images/password.png';
@@ -29,6 +28,7 @@ function App(){
             <div id='link'>
               <p>
                 <a href="#">Forgot password?</a> Or <a href='#'>Sign Up</a>
+              
               </p>
             </div>
           </div>
